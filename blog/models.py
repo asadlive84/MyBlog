@@ -1,6 +1,13 @@
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+
+
+
+class DraftManager(models.Manager):
+    def get_queryset(self):
+        return super(DraftManager, self).get_queryset().filter(status='draft')
 
 
 class PublishedManager(models.Manager):
@@ -25,9 +32,16 @@ class Post(models.Model):
 
     objects = models.Manager()
     published = PublishedManager()
+    draft = DraftManager()
 
     class Meta:
         ordering = ('-publish',)
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('blog:post_details', args=[self.publish.year,
+                                                  self.publish.month,
+                                                  self.publish.day,
+                                                  self.slug])
